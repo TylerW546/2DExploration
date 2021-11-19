@@ -10,29 +10,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def main():
-    from terrain import Terrain as Terrain
+    from Terrain import Terrain as Terrain
+    from player import Player as Player
     from camera import Camera as Camera
 
     screen = pygame.display.set_mode((1080,720))
-    movePer = 8
+    movePer = 1
     while (True):
         for event in pygame.event.get():
-
             if event.type == QUIT:
                 pygame.quit()
                 exit()
-        
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            Camera.moveHoriz(-movePer)
+            Player.moveHoriz(-movePer)
         if keys[pygame.K_RIGHT]:
-            Camera.moveHoriz(movePer)
-        if keys[pygame.K_UP]:
-            Camera.moveVert(-movePer)
+            Player.moveHoriz(movePer)
+        if Player.onGround:
+            if keys[pygame.K_UP]:
+                Player.jump()
         if keys[pygame.K_DOWN]:
-            Camera.moveVert(movePer)
+            Player.moveVert(movePer)
         
-        Camera.draw(screen, Terrain)
+        if True in Player.sideCollide:
+            print(Player.sideCollide)
+        Player.update()
+        
+        Camera.followPlayer(Player)
+        Camera.draw(screen, Terrain, Player)
         
         pygame.display.update()
 

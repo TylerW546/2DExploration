@@ -1,21 +1,30 @@
 import pygame
+from player import Player as Player
 
 class Camera():
     x = 5
     y = 5
-    gridWorth = 16
 
+    def followPlayer(Player):
+        Camera.x = Player.x - 500
+        Camera.y = Player.y - 300
+        
     def moveHoriz(x):
         Camera.x += x
 
     def moveVert(y):
         Camera.y += y
 
-    def draw(screen, Terrain):
+    def draw(screen, Terrain, Player):
         screen.fill((255,255,255))
         w,h = pygame.display.get_surface().get_size()
-        for x in range(Camera.x-Camera.x%Camera.gridWorth, Camera.x+w, Camera.gridWorth):
-            for y in range(Camera.y-Camera.y%Camera.gridWorth, Camera.y+h, Camera.gridWorth):
-                if y//Camera.gridWorth >= 0 and y//Camera.gridWorth < len(Terrain.terrainMap) and x//Camera.gridWorth >= 0 and x//Camera.gridWorth < len(Terrain.terrainMap[0]):
-                    if Terrain.terrainMap[y//Camera.gridWorth][x//Camera.gridWorth]==1:
-                        pygame.draw.rect(screen, (0,0,0), (x-Camera.x,y-Camera.y,Camera.gridWorth,Camera.gridWorth))
+        
+        # Terrain
+        for x in range(Camera.x-Camera.x%Terrain.gridWorth, Camera.x+w, Terrain.gridWorth):
+            for y in range(Camera.y-Camera.y%Terrain.gridWorth, Camera.y+h, Terrain.gridWorth):
+                if y//Terrain.gridWorth >= 0 and y//Terrain.gridWorth < len(Terrain.terrainMap) and x//Terrain.gridWorth >= 0 and x//Terrain.gridWorth < len(Terrain.terrainMap[0]):
+                    if Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth]==1:
+                        pygame.draw.rect(screen, (0,0,0), (x-Camera.x,y-Camera.y,Terrain.gridWorth,Terrain.gridWorth))
+
+        # Player
+        pygame.draw.rect(screen, (255,0,0), (Player.x-Player.width//2-Camera.x, Player.y-Player.height//2-Camera.y,Player.width+1,Player.height+1))
