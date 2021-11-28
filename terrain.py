@@ -4,54 +4,90 @@ from main import *
 import math
 
 class Perlin():
-    def fade(t):
-        return t*t*t*(t*(t*6.0 - 15.0) + 10.0)
+    def interpolate(pa, pb, px):
+        ft = px * 3.141593
+        f = (1 - math.cos(ft)) * 0.5
+        return pa * (1 - f) + pb * f
     
-    def grad(p):
-        texture_width = 256.0
-        v = random.randrange(10)
-        if v > 5:
-            return 1.0
-        else: 
-            return -1.0
+    def interpolateTwo(pa, pb, px):
+        return pa * (1 - px) + pb * px
 
-    def noise(p):
-        p0 = float(math.floor(p))
-        p1 = p0 + 1.0
+    def __init__(self, amp = 100, wl = 100, w = 100, h = 100, fq = 1/100):
+        self.x = 0
+        self.yStart = 0
+        self.y = self.yStart 
+        
+        self.w = w
+        self.h = h
+        
+        self.amp = amp # amplitude
+        self.wl = wl # wavelength
+        self.fq = fq # frequency
+        
+        self.M = 4294967296 # a - 1 should be divisible by m's prime factors
+        self.A = 166452 #c and m should be co-prime
+        self.C = 1
+        
+        self.Z = math.floor(random.randrange(1000)/1000 * self.M)
+                
+        self.a = self.rand()
+        self.b = self.rand()
+    
+    def rand(self):
+        self.Z = (self.A * self.Z + self.C) % self.M
+        return self.Z / self.M
+    
+    def create(self):
+        heights = []
+        while(self.x < self.w):
+            if (self.x % self.wl == 0):
+                self.a = self.b
+                self.b = self.rand()
+                self.y = self.yStart + self.a * self.amp
+            else:
+                self.y = self.yStart + Perlin.interpolate(self.a, self.b, (self.x % self.wl) / self.wl) * self.amp
+            heights.append(self.y)
+            self.x += 1
+        return heights
+    
+    #octave generator
+    def GenerateNoise(amp, wl, octaves, divisor, width):
+        result = []
+        for i in range(octaves):
+            result.append(Perlin(amp, wl, width).create())
+            amp /= divisor
+            wl /= divisor
+        return result
+
+    #combines octaves together
+    def CombineNoise(resultsList):
+        final = []
+        for index in range(len(resultsList[0])):
+            total = 0.0
+            for list in range(len(resultsList)):
+                total += resultsList[list][index]
+            final.append(total)
+        return final
             
-        t = p - p0
-        fade_t = Perlin.fade(t)
 
-        g0 = Perlin.grad(p0)
-        g1 = Perlin.grad(p1)
-  
-        return (1.0-fade_t)*g0*(p - p0) + fade_t*g1*(p - p1)
-    
-    def pixelValue(coord, screenSize):
-        frequency = 1.0 / 20.0
-        amplitude = 1.0 / 5.0
-        n = Perlin.noise(coord.x * frequency) * amplitude
-        y = 2.0 * ((screenSize.y-coord.y)/screenSize.y) - 1.0; # map coord.y into [-1; 1] range
-        if n > y: 
-            return 1
-        else:
-            return 0
-
-print(Perlin.noise(2014))
 
 class Terrain():
-    mapSize = (256,256)
-    gridWorth = 9
+    mapSize = (256,1000)
+    gridWorth = 33
 
     terrainMap = np.zeros(mapSize, dtype=np.uint8)
 
+    octaves = 4
+    heights = Perlin.CombineNoise(Perlin.GenerateNoise(128,128,octaves,2,mapSize[1]))
+    firstHeight = mapSize[0]-round(heights[5])
+    
     for col in range(len(terrainMap[0])):
-        startHeight = random.randrange(mapSize[1]//4-1,mapSize[1]//4+1)
-        for row in range(startHeight,len(terrainMap)):
+        startHeight = heights[col]
+        for row in range(mapSize[0]-round(startHeight),len(terrainMap)):
             terrainMap[row][col] = 1
-    for i in range(len(terrainMap)):
-        for j in range(len(terrainMap[i])):
-            terrainMap[i][j] = Perlin.pixelValue(Vector2(j,i), Vector2(len(terrainMap[0]), len(terrainMap)))
+    
+    plt.imshow(terrainMap)
+    plt.show()
     
     def isCollider(x, y):
         if y//Terrain.gridWorth >= 0 and y//Terrain.gridWorth < len(Terrain.terrainMap) and x//Terrain.gridWorth >= 0 and x//Terrain.gridWorth < len(Terrain.terrainMap[0]):

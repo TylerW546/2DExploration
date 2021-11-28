@@ -13,9 +13,9 @@ def main():
     from Terrain import Terrain as Terrain
     from player import Player as Player
     from camera import Camera as Camera
-
+    Player.x = 5*Terrain.gridWorth
+    Player.y = Terrain.firstHeight*Terrain.gridWorth
     screen = pygame.display.set_mode((1080,720))
-    movePer = 1
     while (True):
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -23,26 +23,24 @@ def main():
                 exit()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            Player.moveHoriz(-movePer)
+            Player.moveLeft()
         if keys[pygame.K_RIGHT]:
-            Player.moveHoriz(movePer)
+            Player.moveRight()
+        if keys[pygame.K_LSHIFT]:
+            Player.speed = 5
+        else:
+            Player.speed = 2
         if Player.onGround:
-            if keys[pygame.K_UP]:
+            if keys[pygame.K_SPACE]:
                 Player.jump()
-        if keys[pygame.K_DOWN]:
-            Player.moveVert(movePer)
-        
-        if True in Player.sideCollide:
-            print(Player.sideCollide)
         Player.update()
         
         Camera.followPlayer(Player)
         Camera.draw(screen, Terrain, Player)
         
         pygame.display.update()
-
         
-        time.sleep(.001)
+        time.sleep(.01666)
 
 if __name__ == "__main__":
     main()

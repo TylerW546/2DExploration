@@ -5,8 +5,8 @@ from Vector2 import Vector2
 class Player():
     x = 100
     y = 300
-    width = 8
-    height = 8
+    width = 32
+    height = 64
     pointEvery = 1
     sideCollide = [False for i in range(4)]
     onGround = False
@@ -16,7 +16,10 @@ class Player():
     jumpMax = 10
 
     jumpCool = 0
-    jumpCoolMax = 50
+    jumpCoolMax = 0
+
+    speed = 2
+    airSpeed = 1.5
 
     velocity = Vector2(0,0)
     accell = Vector2(0,0)
@@ -33,7 +36,7 @@ class Player():
 
     def fall():
         if not Player.onGround:
-            Player.accell.y += .75
+            Player.accell.y += 3
         else:
             Player.velocity.y = min(0,Player.velocity.y)
     
@@ -46,7 +49,7 @@ class Player():
     def jumpProcess():
         if Player.isJumping == True:
             if Player.jumpFrame > 0:
-                Player.accell.y = -3
+                Player.accell.y = -5
                 Player.jumpFrame -= 1
             else:
                 Player.isJumping = False
@@ -55,7 +58,9 @@ class Player():
         Player.velocity.x += Player.accell.x
         Player.velocity.y += Player.accell.y
         Player.accell = Vector2()
-        Player.velocity.ScalarMultipy(.8)
+        Player.velocity.ScalarMultipy(.9)
+        if Player.onGround:
+            Player.velocity.ScalarMultipy(.8)
         #Player.velocity[0] = max(-4, min(Player.velocity[0], 4))
         #Player.velocity[1] = max(-4, min(Player.velocity[1], 4))
         
@@ -93,47 +98,50 @@ class Player():
             if not(Player.sideCollide[7]) or ignoreCollide:
                 Player.x += 1
     
-    def moveHoriz(x):
-        Player.accell.x += x
-
-    def moveVert(y):
-        Player.accell.y += y
+    def moveLeft():
+        if Player.onGround:
+            Player.accell.x -= Player.speed
+        else:
+            Player.accell.x -= Player.airSpeed
+        
+    def moveRight():
+        if Player.onGround:
+            Player.accell.x += Player.speed
+        else:
+            Player.accell.x += Player.airSpeed
 
     def awayFromIntersect():
         Player.getSideCollides()
         if Player.sideCollide[0]:
             Player.y += -1
+        else:
             if Player.sideCollide[2]:
-                Player.y += -1
-        if Player.sideCollide[1]:
-            Player.x += 1
-            if Player.sideCollide[3]:
+                Player.y += 1
+            if Player.sideCollide[1]:
                 Player.x += 1
-        if Player.sideCollide[2]:
-            Player.y += 1
-        if Player.sideCollide[3]:
-            Player.x += -1
-        
-        
+            if Player.sideCollide[3]:
+                Player.x += -1
 
     def getSideCollides():
         Player.sideCollide = [None for i in range(8)]
+        
+        colliderStep = 5
         # Ground
-        Player.sideCollide[0] = Player.colliderRect(Player.x-Player.width//2,Player.y+Player.height//2-1,Player.width,1,1)
+        Player.sideCollide[0] = Player.colliderRect(Player.x-Player.width//2,Player.y+Player.height//2-1,Player.width,1,colliderStep)
         # Left
-        Player.sideCollide[1] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2,1,Player.height,1)
+        Player.sideCollide[1] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2,1,Player.height,colliderStep)
         # Head
-        Player.sideCollide[2] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2,Player.width,1,1)
+        Player.sideCollide[2] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2,Player.width,1,colliderStep)
         # Right
-        Player.sideCollide[3] = Player.colliderRect(Player.x+Player.width//2-1,Player.y-Player.height//2,1,Player.height,1)
+        Player.sideCollide[3] = Player.colliderRect(Player.x+Player.width//2-1,Player.y-Player.height//2,1,Player.height,colliderStep)
         # GroundCheck
-        Player.sideCollide[4] = Player.colliderRect(Player.x-Player.width//2,Player.y+Player.height//2,Player.width,1,1)
+        Player.sideCollide[4] = Player.colliderRect(Player.x-Player.width//2,Player.y+Player.height//2,Player.width,1,colliderStep)
         # LeftWallCheck
-        Player.sideCollide[5] = Player.colliderRect(Player.x-Player.width//2-1,Player.y-Player.height//2,1,Player.height,1)
+        Player.sideCollide[5] = Player.colliderRect(Player.x-Player.width//2-1,Player.y-Player.height//2,1,Player.height,colliderStep)
         # UpperWallCheck
-        Player.sideCollide[6] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2-1,Player.width,1,1)
+        Player.sideCollide[6] = Player.colliderRect(Player.x-Player.width//2,Player.y-Player.height//2-1,Player.width,1,colliderStep)
         # RightWallCheck
-        Player.sideCollide[7] = Player.colliderRect(Player.x+Player.width//2,Player.y-Player.height//2,1,Player.height,1)
+        Player.sideCollide[7] = Player.colliderRect(Player.x+Player.width//2,Player.y-Player.height//2,1,Player.height,colliderStep)
         
         # Ground
         if Player.sideCollide[4]:
@@ -144,8 +152,10 @@ class Player():
     def colliderRect(x,y,w,h,step):
         total = 0
         possible = 0
-        for y2 in range(y,y+h+1,step):
-            for x2 in range(x,x+w+1,step):
+        ys = [y2 for y2 in range(y,y+h+1,step)] + [y+h]
+        xs = [x2 for x2 in range(x,x+w+1,step)] + [x+w]
+        for y2 in ys:
+            for x2 in xs:
                 possible += 1
                 if Terrain.isCollider(x2,y2):
                     total += 1
