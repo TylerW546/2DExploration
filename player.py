@@ -18,7 +18,7 @@ class Player():
     jumpCool = 0
     jumpCoolMax = 0
 
-    speed = 2
+    speed = 3
     airSpeed = 1.5
 
     velocity = Vector2(0,0)
@@ -60,7 +60,7 @@ class Player():
         Player.accell = Vector2()
         Player.velocity.ScalarMultipy(.9)
         if Player.onGround:
-            Player.velocity.ScalarMultipy(.8)
+            Player.velocity.ScalarMultipy(.85)
         #Player.velocity[0] = max(-4, min(Player.velocity[0], 4))
         #Player.velocity[1] = max(-4, min(Player.velocity[1], 4))
         

@@ -72,26 +72,41 @@ class Perlin():
 
 
 class Terrain():
+    
     mapSize = (256,1000)
     gridWorth = 33
 
-    terrainMap = np.zeros(mapSize, dtype=np.uint8)
 
-    octaves = 4
+    groundNums = [2,3,4,5,6,7]
+    terrainMap = np.zeros(mapSize, dtype=np.uint8)
+    colors = [None, (100,100,200), (50,50,50), (200,200,200)]
+    
+    
+    octaves = 8
     heights = Perlin.CombineNoise(Perlin.GenerateNoise(128,128,octaves,2,mapSize[1]))
     firstHeight = mapSize[0]-round(heights[5])
     
     for col in range(len(terrainMap[0])):
         startHeight = heights[col]
         for row in range(mapSize[0]-round(startHeight),len(terrainMap)):
-            terrainMap[row][col] = 1
+            terrainMap[row][col] = 2
+    #
+    
+    
+    for i in range(len(terrainMap)):
+        for j in range(len(terrainMap[0])):
+            if terrainMap[i][j] == 2 and i < 100:
+                terrainMap[i][j] = 3
+            if terrainMap[i][j] == 0 and i > 150:
+                terrainMap[i][j] = 1
+            
     
     plt.imshow(terrainMap)
     plt.show()
     
     def isCollider(x, y):
         if y//Terrain.gridWorth >= 0 and y//Terrain.gridWorth < len(Terrain.terrainMap) and x//Terrain.gridWorth >= 0 and x//Terrain.gridWorth < len(Terrain.terrainMap[0]):
-            if Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth]==1:
+            if Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth] in Terrain.groundNums:
                 return True
         return False
     

@@ -16,15 +16,16 @@ class Camera():
         Camera.y += y
 
     def draw(screen, Terrain, Player):
-        screen.fill((255,255,255))
+        screen.fill((178,255,255))
         w,h = pygame.display.get_surface().get_size()
         
         # Terrain
         for x in range(Camera.x-Camera.x%Terrain.gridWorth, Camera.x+w, Terrain.gridWorth):
             for y in range(Camera.y-Camera.y%Terrain.gridWorth, Camera.y+h, Terrain.gridWorth):
                 if y//Terrain.gridWorth >= 0 and y//Terrain.gridWorth < len(Terrain.terrainMap) and x//Terrain.gridWorth >= 0 and x//Terrain.gridWorth < len(Terrain.terrainMap[0]):
-                    if Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth]==1:
-                        pygame.draw.rect(screen, (0,0,0), (x-Camera.x,y-Camera.y,Terrain.gridWorth,Terrain.gridWorth))
+                    code = Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth]
+                    if code != 0:
+                        pygame.draw.rect(screen, Terrain.colors[code], (x-Camera.x,y-Camera.y,Terrain.gridWorth,Terrain.gridWorth))
 
         # Player
         pygame.draw.rect(screen, (255,0,0), (Player.x-Player.width//2-Camera.x, Player.y-Player.height//2-Camera.y,Player.width+1,Player.height+1))
