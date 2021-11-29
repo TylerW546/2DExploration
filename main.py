@@ -23,17 +23,18 @@ def main():
                 pygame.quit()
                 exit()
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_LSHIFT]:
+            Player.sprinting = True
+        if keys[pygame.K_w]:
+            Player.moveUp()
         if keys[pygame.K_a]:
             Player.moveLeft()
+        if keys[pygame.K_s]:
+            Player.moveDown()
         if keys[pygame.K_d]:
             Player.moveRight()
-        if keys[pygame.K_LSHIFT]:
-            Player.speed = 5
-        else:
-            Player.speed = 3
-        if Player.onGround:
-            if keys[pygame.K_SPACE]:
-                Player.jump()
+        if keys[pygame.K_SPACE]:
+            Player.jump()
         Player.update()
         
         Camera.followPlayer(Player)

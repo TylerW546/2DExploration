@@ -109,6 +109,10 @@ class Terrain():
             if Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth] in Terrain.groundNums:
                 return True
         return False
+
+    def getBlockType(x, y):
+        if y//Terrain.gridWorth >= 0 and y//Terrain.gridWorth < len(Terrain.terrainMap) and x//Terrain.gridWorth >= 0 and x//Terrain.gridWorth < len(Terrain.terrainMap[0]):
+            return Terrain.terrainMap[y//Terrain.gridWorth][x//Terrain.gridWorth]
     
     def getIndexes(x,y):
         return y//Terrain.gridWorth, x//Terrain.gridWorth
